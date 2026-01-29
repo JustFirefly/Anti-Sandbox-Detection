@@ -1,0 +1,71 @@
+====================================
+WEEKLY PROJECT LOG
+Week Number: 1
+Date Range: 23/09/2026 to 30/09/2026
+====================================
+------------------------------------
+1. WORK COMPLETED
+
+> Technical Tasks: None
+
+> Deliverable Progress: 
+	a. Working on what VM setup to use (currently FlareVM). 
+	b. Collecting techniques for VM evasion.
+
+> Literature Studied: Added Malware Analyst's Cookbook and Practical Malware Analysis
+
+
+------------------------------
+2. DECISION LOG AND RATIONALE
+
+> Decision: 
+> Justification: 
+
+
+------------------------------
+3. GENERATIVE AI USAGE LOG 
+
+> Tool Used: 
+
+> Part of Work: 
+
+> Specific Prompts Used:
+
+> AI Output Summary: 
+
+> Modifications Made: 
+
+
+---------------------------
+4. DATA AND VERSION CONTROL
+
+> Repository Status (GitHub hash): 
+
+> Data Preservation (Logs):
+
+
+---------------------------
+===========================
+SUPERVISORY MEETING MINUTES
+=========================== 
+---------------------------
+Meeting Date: 30/01/2026
+Location/Medium: University, A309C
+Attendees: Mohammed Siddiqui, Martin Nyx Brain.
+---------------------------
+1. AGENDA ITEMS
+	a. Finding test cases.
+	b. Would combining different techniques be a good idea?
+	c. Should I test between different VM setups too? e.g. FlareVM vs Cuckoo Sandbox vs VMRay etc.
+---------------------------
+2. FEEDBACK RECEIVED
+
+---------------------------
+3. AGREED ACTIONS
+
+---------------------------
+4. APPROVAL TRACKING
+
+> Date Minutes Drafted: 
+> Date Minutes Sent to Supervisor: 
+> Date Confirmed by Supervisor: 
