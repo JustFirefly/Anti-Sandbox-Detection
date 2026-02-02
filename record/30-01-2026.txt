@@ -56,16 +56,22 @@ Attendees: Mohammed Siddiqui, Martin Nyx Brain.
 1. AGENDA ITEMS
 	a. Finding test cases.
 	b. Would combining different techniques be a good idea?
-	c. Should I test between different VM setups too? e.g. FlareVM vs Cuckoo Sandbox vs VMRay etc.
+	c. Should I test between different VM "distributions" too? e.g. FlareVM vs Cuckoo Sandbox vs VMRay etc.
 ---------------------------
 2. FEEDBACK RECEIVED
-
+	a. Not a huge amount of point in trying combinations. Do the techniques interact in a certain way? 
+	b. Classification of techniques? Positive tests of existence e.g. does a screen exist, does a mouse exist? or any side channels e.g. "How long does it take to do this task?"
+	c. Over time you should test more than one VM "distributions" -> What degree do the countermeasures generalise?
+	
+	Extra:
+	1. Presentation of results -> methods subsection on the sandbox techniques - give a paragraph on each technique.
+	2. Try same VM but with different setups e.g. Networking
 ---------------------------
 3. AGREED ACTIONS
-
+	Setup a VM and get a program working on it.
 ---------------------------
 4. APPROVAL TRACKING
 
-> Date Minutes Drafted: 
-> Date Minutes Sent to Supervisor: 
+> Date Minutes Drafted: 02/02/2026
+> Date Minutes Sent to Supervisor: 03/02/2026
 > Date Confirmed by Supervisor: 
