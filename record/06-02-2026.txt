@@ -1,0 +1,69 @@
+====================================
+WEEKLY PROJECT LOG
+Week Number: 2
+Date Range: 31-01-2026 to 06-02-2026
+====================================
+------------------------------------
+1. WORK COMPLETED
+
+> Technical Tasks: Set up Virtual Box
+
+> Deliverable Progress: O1 Draft ready for review.
+
+> Literature Studied: 
+	a. VirtualBox resources.
+
+------------------------------
+2. DECISION LOG AND RATIONALE
+
+> Decision: 
+> Justification: 
+
+
+------------------------------
+3. GENERATIVE AI USAGE LOG 
+
+> Tool Used: 
+
+> Part of Work: 
+
+> Specific Prompts Used:
+
+> AI Output Summary: 
+
+> Modifications Made: 
+
+
+
+---------------------------
+4. DATA AND VERSION CONTROL
+
+> Repository Status (GitHub hash): 7741cb252445dc28ffe083a3e07af85a9f6db9a9
+
+> Data Preservation (Logs): 
+
+
+---------------------------
+===========================
+SUPERVISORY MEETING MINUTES
+=========================== 
+---------------------------
+Meeting Date: 06-02-2026
+Location/Medium: City University of London, A309c
+Attendees: Mohammed Siddiqui, Martin Nyx Brain.
+---------------------------
+1. AGENDA ITEMS
+	a. O1 draft review
+---------------------------
+2. FEEDBACK RECEIVED
+ 	a.
+	extra. 
+---------------------------
+3. AGREED ACTIONS
+
+---------------------------
+4. APPROVAL TRACKING
+
+> Date Minutes Drafted: 
+> Date Minutes Sent to Supervisor: 
+> Date Confirmed by Supervisor: 
