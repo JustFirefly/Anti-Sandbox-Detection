@@ -23,15 +23,16 @@ Date Range: 31-01-2026 to 06-02-2026
 ------------------------------
 3. GENERATIVE AI USAGE LOG 
 
-> Tool Used: 
+> Tool Used: NotebookLM
 
-> Part of Work: 
+> Part of Work: Output 1 Draft
 
-> Specific Prompts Used:
+> Specific Prompts Used: 
+What are the different ways of evading sandboxes and malware analysis?
 
-> AI Output Summary: 
+> AI Output Summary: List of techniques of evading sandboxes and malware analysis from a list of sources.
 
-> Modifications Made: 
+> Modifications Made: Compiled into a draft for review.
 
 
 
@@ -56,14 +57,21 @@ Attendees: Mohammed Siddiqui, Martin Nyx Brain.
 	a. O1 draft review
 ---------------------------
 2. FEEDBACK RECEIVED
- 	a.
-	extra. 
+ 	a. O1 Draft: Consider adding examples of the techniques being used in the wild.
+ 	b. Countermeasures: Check if detection relies on software emulation or system calls.
+ 	c. VM Setup: Discussed concerns regarding how modifiable the elements of the VM setup are.
+ 	d. Solution Architecture: A potentially perfect malleable solution would be QEmu as the VM with a Linux host, allowing for kernel recompilation.
+
 ---------------------------
 3. AGREED ACTIONS
+	a. Finalise O1 - catalogue of techniques to work on to include hardware drivers and number of processes running.
+	b. Research hypervisors.
+	c. Look at QEmu: Determine which parts of the VM can be modified and assess the difficulty level.
+	d. Literature Search: Review Lwn.net.
 
 ---------------------------
 4. APPROVAL TRACKING
 
-> Date Minutes Drafted: 
-> Date Minutes Sent to Supervisor: 
-> Date Confirmed by Supervisor: 
+> Date Minutes Drafted: 09/02/2026
+> Date Minutes Sent to Supervisor: 10/02/2026 
+> Date Confirmed by Supervisor:
