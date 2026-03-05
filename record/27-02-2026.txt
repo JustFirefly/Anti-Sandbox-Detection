@@ -1,0 +1,67 @@
+====================================
+WEEKLY PROJECT LOG
+Week Number: 5
+Date Range: 21-02-2026 to 27-02-2026
+====================================
+------------------------------------
+1. WORK COMPLETED
+
+> Technical Tasks: Doing eBPF tutorials.
+
+> Deliverable Progress: Output 1 complete - added 2 more techniques.
+	
+> Literature Studied: eBPF documentation.
+
+------------------------------
+2. DECISION LOG AND RATIONALE
+
+> Decision: 
+> Justification: 
+
+
+------------------------------
+3. GENERATIVE AI USAGE LOG 
+
+> Tool Used: 
+
+> Part of Work: 
+
+> Specific Prompts Used:
+
+> AI Output Summary: 
+
+> Modifications Made: 
+
+
+
+---------------------------
+4. DATA AND VERSION CONTROL
+
+> Repository Status (GitHub hash): 
+
+> Data Preservation (Logs):
+
+
+---------------------------
+===========================
+SUPERVISORY MEETING MINUTES
+=========================== 
+---------------------------
+Meeting Date: 
+Location/Medium: 
+Attendees: Mohammed Siddiqui, Martin Nyx Brain.
+---------------------------
+1. AGENDA ITEMS
+	a. Overall progress with project.
+---------------------------
+2. FEEDBACK RECEIVED
+
+---------------------------
+3. AGREED ACTIONS
+
+---------------------------
+4. APPROVAL TRACKING
+
+> Date Minutes Drafted: 
+> Date Minutes Sent to Supervisor: 
+> Date Confirmed by Supervisor: 
