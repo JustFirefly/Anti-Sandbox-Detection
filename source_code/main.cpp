@@ -11,7 +11,7 @@
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "user32.lib")
-
+#pragma comment(lib, "Advapi32.lib")
 // -----------------------------------------------------------------------------------------
 // T01: Hardware Artifacts - CPUID (Hypervisor Bit)
 // Source: Adapted from a0rtega/pafish/pafish/cpu.c (Converted to MSVC Intrinsics)
@@ -46,7 +46,8 @@ void t02_mac_check() {
         { {0x00, 0x0C, 0x29}, "VMware" },
         { {0x00, 0x1C, 0x14}, "VMware" },
         { {0x00, 0x50, 0x56}, "VMware" },
-        { {0x08, 0x00, 0x27}, "VirtualBox" }
+        { {0x08, 0x00, 0x27}, "VirtualBox" },
+	{ {0x52, 0x54, 0x00}, "QEMU/KVM" }
     };
 
     // Buffer for GetAdaptersInfo
@@ -110,7 +111,10 @@ void t03_driver_files() {
         _T("C:\\WINDOWS\\system32\\drivers\\VBoxGuest.sys"),
         _T("C:\\WINDOWS\\system32\\drivers\\vmnet.sys"),
         _T("C:\\WINDOWS\\system32\\drivers\\vmmouse.sys"),
-        _T("C:\\WINDOWS\\system32\\drivers\\vmci.sys")
+        _T("C:\\WINDOWS\\system32\\drivers\\vmci.sys"),
+	_T("C:\\WINDOWS\\system32\\drivers\\viostar.sys"),
+	_T("C:\\WINDOWS\\system32\\drivers\\netktvm.sys"),
+	_T("C:\\WINDOWS\\system32\\drivers\\balloon.sys")
     };
 
     printf("[T03] Driver File Check: Initiated\n");
@@ -168,7 +172,9 @@ void t04_process_scan() {
         _T("vboxtray.exe"),
         _T("vmtoolsd.exe"),
         _T("wireshark.exe"),
-        _T("procmon.exe")
+        _T("procmon.exe"),
+	_T("qemu-ga.exe"),
+	_T("spice-vdagent.exe")
     };
 
     printf("[T04] Analysis Process Scan: Initiated\n");
