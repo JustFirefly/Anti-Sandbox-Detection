@@ -1,0 +1,42 @@
+PROJECT: Sandbox Detection & Evasion
+DOCUMENT: Environment Build & Pre-Spoof Testing Record
+DATE: March 2026
+AUTHOR: Mohammed Siddiqui 
+CONSULTANT: Martin Nyx Brain 
+
+1.0 HOST INFRASTRUCTURE DEPLOYMENT
+-----------------------------------
+Objective: Establish a functional virtualization host on an Ubuntu system with strict Secure Boot compliance to support Phase 3.1 of the work plan.
+
+    1.1 Hypervisor Installation & Configuration
+    - Installed Oracle VirtualBox 7.2 to resolve header incompatibilities with the Linux 6.17 kernel.
+    - Successfully generated Machine Owner Keys (MOK) and manually signed the VirtualBox kernel modules (e.g., vboxdrv.ko) to satisfy host UEFI Secure Boot requirements.
+    - Validated successful loading of the hypervisor core drivers into the Linux kernel.
+
+2.0 TARGET ENVIRONMENT PROVISIONING
+-----------------------------------
+Objective: Build the Windows 11 sandbox environment ("The Bait") as defined in the project specifications.
+
+    2.1 VM Configuration (Win11_Sandbox)
+    - Provisioned a Windows 11 Enterprise (Evaluation) VM with vTPM 2.0 and EFI enabled.
+    - Established the snapshot hierarchy: captured "Snapshot A: Base Install" and "Snapshot B: Golden Image" (containing VirtualBox Guest Additions and disabled security controls).
+
+    2.2 Isolation & Data Transfer
+    - Implemented a Read-Only Shared Folder (mapped as Z:\vbox_share) to strictly enforce host isolation while allowing seamless executable transfer from the Ubuntu host.
+
+3.0 DEVELOPMENT WORKFLOW ESTABLISHMENT
+--------------------------------------
+Objective: Enable rapid C/C++ prototyping and compilation directly from the Linux host, mitigating the need for a secondary Windows development VM.
+
+    3.1 Cross-Compilation Pipeline
+    - Installed the MinGW-w64 toolchain on the Ubuntu host.
+    - Configured the compiler to statically link GNU standard libraries (-static flag), successfully resolving missing `libstdc++-6.dll` runtime dependencies within the Windows guest environment.
+
+4.0 MILESTONE: PRE-SPOOF TEST EXECUTION
+---------------------------------------
+Objective: Validate the unmodified sandbox detection algorithms against the target environment (Project Objective 3).
+
+    4.1 Baseline Testing
+    - Successfully compiled the C++ PoC payload (sandbox_tester.exe) encompassing detection mechanisms T01 through T08.
+    - Executed the payload within the vulnerable Target VM via the shared folder.
+    - Confirmed operational capability of the executable, officially establishing the baseline detection metrics required prior to evasion development.
