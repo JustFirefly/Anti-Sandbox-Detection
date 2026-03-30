@@ -2718,9 +2718,6 @@ static int setup_vmcs_config(struct vmcs_config *vmcs_conf,
 		return -EIO;
 
 	rdmsrq(MSR_IA32_VMX_MISC, misc_msr);
-	/* T06 Evasion Flag
-	 * Forcibly tells the CPU to cause a VM-Exit when the guest calls RDTSC -> should trap any RDTSC calls to the KVM
-	 * */
 	vmcs_conf->basic = basic_msr;
 	vmcs_conf->pin_based_exec_ctrl = _pin_based_exec_control;
 	vmcs_conf->cpu_based_exec_ctrl = _cpu_based_exec_control;
@@ -4411,7 +4408,7 @@ static u32 vmx_exec_control(struct vcpu_vmx *vmx)
 				CPU_BASED_MONITOR_EXITING);
 	if (kvm_hlt_in_guest(vmx->vcpu.kvm))
 		exec_control &= ~CPU_BASED_HLT_EXITING;
-	//trapping the RDTSC call here with a bit hack
+	//T06: trapping the RDTSC call here with a bit hack
 	exec_control |= CPU_BASED_RDTSC_EXITING;
 	return exec_control;
 }
@@ -4578,7 +4575,7 @@ static u32 vmx_secondary_exec_control(struct vcpu_vmx *vmx)
 
 	if (!kvm_notify_vmexit_enabled(vcpu->kvm))
 		exec_control &= ~SECONDARY_EXEC_NOTIFY_VM_EXITING;
-	// Bit hack 2: Electric Boogaloo
+	// T06 Bit hack
 	exec_control |= SECONDARY_EXEC_ENABLE_RDTSCP;
 	return exec_control;
 }
@@ -6186,8 +6183,8 @@ static int (*kvm_vmx_exit_handlers[])(struct kvm_vcpu *vcpu) = {
 	[EXIT_REASON_TDCALL]		      = handle_tdx_instruction,
 	[EXIT_REASON_MSR_READ_IMM]            = handle_rdmsr_imm,
 	[EXIT_REASON_MSR_WRITE_IMM]           = handle_wrmsr_imm,
-	[EXIT_REASON_RDTSC]		      = handle_rdtsc, //Added new reason for VM-Exit to handle RDTSC
-	[EXIT_REASON_RDTSCP] 		      = handle_rdtscp, //Added new reason 
+	[EXIT_REASON_RDTSC]		      = handle_rdtsc, //T06: Added new reason for VM-Exit to handle RDTSC
+	[EXIT_REASON_RDTSCP] 		      = handle_rdtscp, //T06: Added new reason 
 };
 
 static const int kvm_vmx_max_exit_handlers =
