@@ -416,38 +416,63 @@ printf("[T08] Active Hardware Signal Check: Initiated\n");
     set_color(WHITE);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     set_color(YELLOW);
     printf("=== Sandbox Detection Proof of Concept ===\n");
     printf("Target Platform: Windows 11\n\n");
     set_color(WHITE);
 
-    // T01
-    set_color(CYAN);
-    printf("[T01] CPUID Check: ");
-    if (cpu_hv()) {
-        set_color(RED);
-        printf("[!] Hypervisor Detected\n");
-    }
-    else {
-        set_color(GREEN);
-        printf("Clean\n");
-    }
-    set_color(WHITE);
+    bool run_t01 = false, run_t02 = false, run_t03 = false, run_t04 = false;
+    bool run_t05 = false, run_t06 = false, run_t07 = false, run_t08 = false;
 
-    // Run other checks
-    t02_mac_check();
-    t03_driver_files();
-    t04_process_scan();
-    t05_process_count_check();
-    t06_rdtsc_check();
-    t07_audio_device_check();
-    t08_resolution_check();
+    if (argc == 1) {
+        run_t01 = run_t02 = run_t03 = run_t04 = run_t05 = run_t06 = run_t07 = run_t08 = true;
+    } else {
+        for (int i = 1; i < argc; i++) {
+            if (_stricmp(argv[i], "all") == 0 || _stricmp(argv[i], "-all") == 0) {
+                run_t01 = run_t02 = run_t03 = run_t04 = run_t05 = run_t06 = run_t07 = run_t08 = true;
+            }
+            else if (_stricmp(argv[i], "t01") == 0 || _stricmp(argv[i], "-t01") == 0) run_t01 = true;
+            else if (_stricmp(argv[i], "t02") == 0 || _stricmp(argv[i], "-t02") == 0) run_t02 = true;
+            else if (_stricmp(argv[i], "t03") == 0 || _stricmp(argv[i], "-t03") == 0) run_t03 = true;
+            else if (_stricmp(argv[i], "t04") == 0 || _stricmp(argv[i], "-t04") == 0) run_t04 = true;
+            else if (_stricmp(argv[i], "t05") == 0 || _stricmp(argv[i], "-t05") == 0) run_t05 = true;
+            else if (_stricmp(argv[i], "t06") == 0 || _stricmp(argv[i], "-t06") == 0) run_t06 = true;
+            else if (_stricmp(argv[i], "t07") == 0 || _stricmp(argv[i], "-t07") == 0) run_t07 = true;
+            else if (_stricmp(argv[i], "t08") == 0 || _stricmp(argv[i], "-t08") == 0) run_t08 = true;
+        }
+    }
+
+    if (run_t01) {
+        set_color(CYAN);
+        printf("[T01] CPUID Check: ");
+        if (cpu_hv()) {
+            set_color(RED);
+            printf("[!] Hypervisor Detected\n");
+        }
+        else {
+            set_color(GREEN);
+            printf("Clean\n");
+        }
+        set_color(WHITE);
+    }
+
+    if (run_t02) t02_mac_check();
+    if (run_t03) t03_driver_files();
+    if (run_t04) t04_process_scan();
+    if (run_t05) t05_process_count_check();
+    if (run_t06) t06_rdtsc_check();
+    if (run_t07) t07_audio_device_check();
+    if (run_t08) t08_resolution_check();
 
     set_color(YELLOW);
     printf("\n=== Analysis Complete ===\n");
     set_color(WHITE);
-    printf("Press Enter to exit...");
-    getchar();
+    
+    if (argc == 1) {
+        printf("Press Enter to exit...");
+        getchar();
+    }
+
     return 0;
 }
