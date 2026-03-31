@@ -2718,6 +2718,9 @@ static int setup_vmcs_config(struct vmcs_config *vmcs_conf,
 		return -EIO;
 
 	rdmsrq(MSR_IA32_VMX_MISC, misc_msr);
+	/* T06 Evasion Flag
+	 * Forcibly tells the CPU to cause a VM-Exit when the guest calls RDTSC -> should trap any RDTSC calls to the KVM
+	 * */
 	vmcs_conf->basic = basic_msr;
 	vmcs_conf->pin_based_exec_ctrl = _pin_based_exec_control;
 	vmcs_conf->cpu_based_exec_ctrl = _cpu_based_exec_control;
@@ -4408,7 +4411,7 @@ static u32 vmx_exec_control(struct vcpu_vmx *vmx)
 				CPU_BASED_MONITOR_EXITING);
 	if (kvm_hlt_in_guest(vmx->vcpu.kvm))
 		exec_control &= ~CPU_BASED_HLT_EXITING;
-	//T06: trapping the RDTSC call here with a bit hack
+	//trapping the RDTSC call here with a bit hack
 	exec_control |= CPU_BASED_RDTSC_EXITING;
 	return exec_control;
 }
@@ -4575,7 +4578,7 @@ static u32 vmx_secondary_exec_control(struct vcpu_vmx *vmx)
 
 	if (!kvm_notify_vmexit_enabled(vcpu->kvm))
 		exec_control &= ~SECONDARY_EXEC_NOTIFY_VM_EXITING;
-	// T06 Bit hack
+	// Bit hack 2: Electric Boogaloo
 	exec_control |= SECONDARY_EXEC_ENABLE_RDTSCP;
 	return exec_control;
 }
@@ -6057,50 +6060,49 @@ static u64 spoof_tsc(struct kvm_vcpu *vcpu)
 */
 static u64 spoof_tsc(struct kvm_vcpu *vcpu)
 {
-    // Arrays ensure each CPU core has its own independent timeline
     static u64 guest_fake_tsc[256] = {0};
     static u64 host_prev_tsc[256] = {0};
     
     int id = vcpu->vcpu_id;
-    u64 host_now = rdtsc();
+    u64 host_now = rdtsc(); 
     u64 real_delta;
-    
-    // Estimated cycles it takes for the CPU to VM-Exit to the host.
-    // Tweak this later if your RDTSC delta checks are too high/low.
-    u64 exit_tax = 10000; 
 
-    // Failsafe for absurd core counts
+    // Failsafe
     if (id >= 256) {
         return kvm_read_l1_tsc(vcpu, host_now);
     }
 
-    // Initialization for this specific core
+    // Initialization
     if (host_prev_tsc[id] == 0) {
         host_prev_tsc[id] = host_now;
-        guest_fake_tsc[id] = 100000000; // Starting point
+        guest_fake_tsc[id] = 100000000;
         return guest_fake_tsc[id];
     }
 
-    // How much real time passed since THIS core last checked?
-    real_delta = host_now - host_prev_tsc[id];
-
-    // The Tax Deduction Logic:
-    if (real_delta > exit_tax) {
-        // Normal flow: We deduct the tax, and give the guest the real elapsed time.
-        // This keeps the VM running at 100% normal speed.
-        guest_fake_tsc[id] += (real_delta - exit_tax);
+    // Prevent Unsigned Underflow (VCPU Migration Protection)
+    if (host_now < host_prev_tsc[id]) {
+        real_delta = 0; 
     } else {
-        // Back-to-back flow: If the delta is tiny, it means the guest is spamming RDTSC.
-        // We force a small amount of forward progress to simulate a fast physical CPU.
-        guest_fake_tsc[id] += 150;
+        real_delta = host_now - host_prev_tsc[id];
     }
 
-    // Update the marker for next time
+ 
+    // 500,000 cycles is roughly 0.1ms. If RDTSC is called faster than this,
+    // the guest is actively trying to benchmark the CPU.
+    if (real_delta < 500000) {
+        // PROFILING DETECTED: Completely ignore VM-Exit latency.
+        // Force the clock forward by an amount that looks like a native CPUID+RDTSC combo.
+        guest_fake_tsc[id] += host_now % 643; //Use RDTSC call and an arbitrary number to randomise the return value of the RDTSC. 
+    } else {
+        // NORMAL OPERATION: The OS is just doing background tasks.
+        // Let the fake clock catch up to physical time so Windows doesn't desync.
+        guest_fake_tsc[id] += real_delta;
+    }
+
     host_prev_tsc[id] = host_now;
 
     return guest_fake_tsc[id];
 }
-
 static int handle_rdtsc(struct kvm_vcpu *vcpu)
 {
 	u64 tsc = spoof_tsc(vcpu);
@@ -6183,8 +6185,8 @@ static int (*kvm_vmx_exit_handlers[])(struct kvm_vcpu *vcpu) = {
 	[EXIT_REASON_TDCALL]		      = handle_tdx_instruction,
 	[EXIT_REASON_MSR_READ_IMM]            = handle_rdmsr_imm,
 	[EXIT_REASON_MSR_WRITE_IMM]           = handle_wrmsr_imm,
-	[EXIT_REASON_RDTSC]		      = handle_rdtsc, //T06: Added new reason for VM-Exit to handle RDTSC
-	[EXIT_REASON_RDTSCP] 		      = handle_rdtscp, //T06: Added new reason 
+	[EXIT_REASON_RDTSC]		      = handle_rdtsc, //Added new reason for VM-Exit to handle RDTSC
+	[EXIT_REASON_RDTSCP] 		      = handle_rdtscp, //Added new reason 
 };
 
 static const int kvm_vmx_max_exit_handlers =
