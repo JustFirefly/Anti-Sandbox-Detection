@@ -49,6 +49,9 @@
     <suspend-to-disk enabled='no'/>
   </pm>
   <devices>
+    <!---
+        You must modify your Libvirt XML to use LDPRELOAD to modify values to the vCPU.
+    -->
     <emulator>/opt/qemu-wrapper.sh</emulator>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2'/>

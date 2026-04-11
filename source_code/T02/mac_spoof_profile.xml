@@ -143,13 +143,14 @@
       <address type='pci' domain='0x0000' bus='0x05' slot='0x00' function='0x0'/>
     </filesystem>
     <!---
-    	You must modify your Libvirt XML to use a physical hardware vendor's prefix (e.g., Intel 00:1B:21) to bypass OUI checks.
+        You must modify your Libvirt XML to use a physical hardware vendor's prefix (e.g., Intel 00:1B:21) to bypass OUI checks.
     -->
     <interface type='network'>
-  	<mac address='00:1b:21:5a:33:91'/> <source network='default'/>
-  	<model type='e1000e'/>
-  	<address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
-    </interface>serial type='pty'>
+        <mac address='00:1b:21:5a:33:91'/> <source network='default'/>
+        <model type='e1000e'/>
+        <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
+    </interface>
+    <serial type='pty'>
       <target type='isa-serial' port='0'>
         <model name='isa-serial'/>
       </target>

@@ -2,16 +2,19 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <string>
 #include <tlhelp32.h>
 #include <tchar.h>
 #include <mmsystem.h> 
 #include <intrin.h>   
 #include <iphlpapi.h> 
+#include <wininet.h>
 
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "Advapi32.lib")
+#pragma comment(lib, "wininet.lib")
 
 // --- Color Helper ---
 enum ConsoleColor {
@@ -147,7 +150,7 @@ void t03_driver_files() {
     bool foundAny = false;
 
     // Iterate and print status for EVERY file
-    for (int i = 0; i < 8; i++) { // Fixed loop count to match array size
+    for (int i = 0; i < 8; i++) { 
         printf("  [-] Checking: %ls... ", szPaths[i]);
 
         if (is_FileExists(szPaths[i])) {
@@ -213,7 +216,7 @@ void t04_process_scan() {
 
     bool foundAny = false;
 
-    for (int i = 0; i < 7; i++) { // Fixed loop count to match array size
+    for (int i = 0; i < 7; i++) { 
         printf("  [-] Scanning for: %ls... ", szProcesses[i]);
 
         DWORD pid = GetProcessIdFromName(szProcesses[i]);
@@ -344,12 +347,14 @@ void t07_audio_device_check() {
 // Source: Generated (Missing from repos)
 // -----------------------------------------------------------------------------------------
 void t08_resolution_check() {
-printf("[T08] Active Hardware Signal Check: Initiated\n");
+    set_color(CYAN);
+    printf("[T08] Active Hardware Signal Check: Initiated\n");
+    set_color(WHITE);
 
     UINT32 numPathArrayElements = 0;
     UINT32 numModeInfoArrayElements = 0;
 
-    // 1. Ask Windows how much memory we need to store the current display paths
+    // Ask Windows how much memory we need to store the current display paths
     LONG result = GetDisplayConfigBufferSizes(QDC_ONLY_ACTIVE_PATHS, 
                                               &numPathArrayElements, 
                                               &numModeInfoArrayElements);
@@ -359,11 +364,11 @@ printf("[T08] Active Hardware Signal Check: Initiated\n");
         return;
     }
 
-    // 2. Allocate the memory
+    // Allocate the memory
     DISPLAYCONFIG_PATH_INFO* pathInfoArray = new DISPLAYCONFIG_PATH_INFO[numPathArrayElements];
     DISPLAYCONFIG_MODE_INFO* modeInfoArray = new DISPLAYCONFIG_MODE_INFO[numModeInfoArrayElements];
 
-    // 3. Query the actual display configuration mapped to the hardware
+    // Query the actual display configuration mapped to the hardware
     result = QueryDisplayConfig(QDC_ONLY_ACTIVE_PATHS,
                                 &numPathArrayElements, pathInfoArray,
                                 &numModeInfoArrayElements, modeInfoArray,
@@ -375,8 +380,7 @@ printf("[T08] Active Hardware Signal Check: Initiated\n");
         // Iterate through the modes to find the hardware target
         for (UINT32 i = 0; i < numModeInfoArrayElements; i++) {
             
-            // We ONLY want the TARGET mode (the hardware signal leaving the port).
-            // SOURCE mode is the logical Windows desktop.
+            // We ONLY want the TARGET mode
             if (modeInfoArray[i].infoType == DISPLAYCONFIG_MODE_INFO_TYPE_TARGET) {
                 signalFound = true;
                 DISPLAYCONFIG_VIDEO_SIGNAL_INFO signalInfo = modeInfoArray[i].targetMode.targetVideoSignalInfo;
@@ -385,18 +389,13 @@ printf("[T08] Active Hardware Signal Check: Initiated\n");
                        signalInfo.activeSize.cx, 
                        signalInfo.activeSize.cy);
 
-                // Hardware refresh rates are stored as a fraction (Numerator / Denominator)
-                // e.g., 60000 / 1000 = 60Hz. Or 59940 / 1000 = 59.94Hz.
                 if (signalInfo.vSyncFreq.Denominator != 0) {
                     double refreshRate = (double)signalInfo.vSyncFreq.Numerator / signalInfo.vSyncFreq.Denominator;
                     printf("  [-] Hardware Refresh Rate:  %.2f Hz\n", refreshRate);
 
-                    // --- Sandbox Detection Logic ---
-                    // VirtualBox and QEMU often default to weird flat refresh rates 
-                    // or low active signals regardless of what the Windows desktop is set to.
                     if (refreshRate == 0.0 || refreshRate < 50.0) {
                          set_color(RED);
-			    printf("      [!] DETECTED: Suspicious hardware refresh rate (Virtual Display).\n");
+			             printf("      [!] DETECTED: Suspicious hardware refresh rate (Virtual Display).\n");
                     }
                 }
             }
@@ -404,15 +403,93 @@ printf("[T08] Active Hardware Signal Check: Initiated\n");
         
         if (!signalFound) {
             set_color(YELLOW);
-		printf("  [!] DETECTED: No hardware target mode found (Headless/Virtual).\n");
+		    printf("  [!] DETECTED: No hardware target mode found (Headless/Virtual).\n");
         }
     } else {
         printf("  [-] Error: QueryDisplayConfig failed.\n");
     }
 
-    // Clean up
     delete[] pathInfoArray;
     delete[] modeInfoArray;
+    set_color(WHITE);
+}
+
+// -----------------------------------------------------------------------------------------
+// T09: Network Artifacts - External IP / ISP Check
+// Source: Adapted from Al-Khaser and MITRE T1497.001
+// -----------------------------------------------------------------------------------------
+void t09_network_check() {
+    set_color(CYAN);
+    printf("[T09] External Network Check: Initiated\n");
+    set_color(WHITE);
+
+    HINTERNET hInternet = InternetOpenA("Mozilla/5.0 (Windows NT 10.0; Win64; x64)", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+    if (hInternet == NULL) {
+        set_color(RED);
+        printf("  [!] Failed to open internet handle. Assuming isolated sandbox.\n");
+        set_color(WHITE);
+        return;
+    }
+
+    HINTERNET hConnect = InternetOpenUrlA(hInternet, "http://ip-api.com/line/?fields=isp,org,as", NULL, 0, INTERNET_FLAG_RELOAD, 0);
+    if (hConnect == NULL) {
+        set_color(RED);
+        printf("  [!] Failed to connect to internet. Assuming isolated sandbox.\n");
+        set_color(WHITE);
+        InternetCloseHandle(hInternet);
+        return;
+    }
+
+    char buffer[1024];
+    DWORD bytesRead;
+    std::string response = "";
+
+    while (InternetReadFile(hConnect, buffer, sizeof(buffer) - 1, &bytesRead) && bytesRead > 0) {
+        buffer[bytesRead] = '\0';
+        response += buffer;
+    }
+
+    InternetCloseHandle(hConnect);
+    InternetCloseHandle(hInternet);
+
+    if (response.empty()) {
+        set_color(RED);
+        printf("  [!] Empty response from network check. Assuming sandboxed connection.\n");
+        set_color(WHITE);
+        return;
+    }
+
+    // Convert to lowercase for checking
+    std::string lowerResponse = response;
+    for (auto& c : lowerResponse) c = tolower(c);
+
+    const char* blocklist[] = {
+        "amazon", "aws", "microsoft", "azure", "google", "gcp", 
+        "digitalocean", "ovh", "choopa", "linode", "university", 
+        "cisco", "fireeye", "fortinet", "palo alto", "hetzner"
+    };
+
+    bool detected = false;
+    for (const char* blocked : blocklist) {
+        if (lowerResponse.find(blocked) != std::string::npos) {
+            set_color(RED);
+            printf("  [!] DETECTED: Datacenter/Cloud/Analysis ISP found: %s\n", blocked);
+            detected = true;
+            break;
+        }
+    }
+
+    if (!detected) {
+        set_color(GREEN);
+        printf("  [+] Residential/Safe Network Detected.\n");
+    }
+    
+    // Clean up response for clean printing (removing potential newlines)
+    while (!response.empty() && (response.back() == '\n' || response.back() == '\r')) {
+        response.pop_back();
+    }
+    
+    printf("      [-] ISP Info: %s\n", response.c_str());
     set_color(WHITE);
 }
 
@@ -423,14 +500,14 @@ int main(int argc, char* argv[]) {
     set_color(WHITE);
 
     bool run_t01 = false, run_t02 = false, run_t03 = false, run_t04 = false;
-    bool run_t05 = false, run_t06 = false, run_t07 = false, run_t08 = false;
+    bool run_t05 = false, run_t06 = false, run_t07 = false, run_t08 = false, run_t09 = false;
 
     if (argc == 1) {
-        run_t01 = run_t02 = run_t03 = run_t04 = run_t05 = run_t06 = run_t07 = run_t08 = true;
+        run_t01 = run_t02 = run_t03 = run_t04 = run_t05 = run_t06 = run_t07 = run_t08 = run_t09 = true;
     } else {
         for (int i = 1; i < argc; i++) {
             if (_stricmp(argv[i], "all") == 0 || _stricmp(argv[i], "-all") == 0) {
-                run_t01 = run_t02 = run_t03 = run_t04 = run_t05 = run_t06 = run_t07 = run_t08 = true;
+                run_t01 = run_t02 = run_t03 = run_t04 = run_t05 = run_t06 = run_t07 = run_t08 = run_t09 = true;
             }
             else if (_stricmp(argv[i], "t01") == 0 || _stricmp(argv[i], "-t01") == 0) run_t01 = true;
             else if (_stricmp(argv[i], "t02") == 0 || _stricmp(argv[i], "-t02") == 0) run_t02 = true;
@@ -440,6 +517,7 @@ int main(int argc, char* argv[]) {
             else if (_stricmp(argv[i], "t06") == 0 || _stricmp(argv[i], "-t06") == 0) run_t06 = true;
             else if (_stricmp(argv[i], "t07") == 0 || _stricmp(argv[i], "-t07") == 0) run_t07 = true;
             else if (_stricmp(argv[i], "t08") == 0 || _stricmp(argv[i], "-t08") == 0) run_t08 = true;
+            else if (_stricmp(argv[i], "t09") == 0 || _stricmp(argv[i], "-t09") == 0) run_t09 = true;
         }
     }
 
@@ -464,6 +542,7 @@ int main(int argc, char* argv[]) {
     if (run_t06) t06_rdtsc_check();
     if (run_t07) t07_audio_device_check();
     if (run_t08) t08_resolution_check();
+    if (run_t09) t09_network_check();
 
     set_color(YELLOW);
     printf("\n=== Analysis Complete ===\n");

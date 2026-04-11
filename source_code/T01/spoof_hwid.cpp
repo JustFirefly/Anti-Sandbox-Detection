@@ -20,7 +20,7 @@ LONG WINAPI VehHandler(EXCEPTION_POINTERS* ExceptionInfo) {
     if (ExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_BREAKPOINT) {
         void* faultAddr = ExceptionInfo->ExceptionRecord->ExceptionAddress;
 
-        // 1. Check if the breakpoint happened at a CPUID instruction
+        // Check if the breakpoint happened at a CPUID instruction
         for (int i = 0; i < cpuid_count; i++) {
             if (faultAddr == cpuid_addrs[i]) {
                 // Get the requested CPUID leaf from the RAX register
@@ -29,8 +29,7 @@ LONG WINAPI VehHandler(EXCEPTION_POINTERS* ExceptionInfo) {
 
                 // Execute the REAL cpuid instruction inside our handler
                 __asm__ volatile ("cpuid" : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx) : "a"(leaf));
-
-                // If checking features (Leaf 1), tamper with the results!
+		
                 if (leaf == 1) {
                     ecx &= ~(1 << 31); // Clear the 31st bit (Hypervisor Present)
                     printf("[VEH] T01: Trapped CPUID. Cleared Hypervisor bit.\n");
@@ -48,7 +47,7 @@ LONG WINAPI VehHandler(EXCEPTION_POINTERS* ExceptionInfo) {
             }
         }
 
-        // 2. Check if the breakpoint happened at an RDTSC instruction
+        // Check if the breakpoint happened at an RDTSC instruction
         for (int i = 0; i < rdtsc_count; i++) {
             if (faultAddr == rdtsc_addrs[i]) {
                 static uint64_t fake_ticks = 1000;
