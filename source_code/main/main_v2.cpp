@@ -13,6 +13,7 @@
 #include <mmdeviceapi.h>
 #include <functiondiscoverykeys_devpkey.h>
 #include <initguid.h>
+#include <propsys.h>
 
 #pragma comment(lib, "ole32.lib") 
 #pragma comment(lib, "iphlpapi.lib")
@@ -338,8 +339,6 @@ void t06_rdtsc_check() {
 // T07: Hardware Artifacts - Audio Device Check 
 // Source: (Missing from repos)
 // -----------------------------------------------------------------------------------------
-// Explicitly define the missing MinGW property key to satisfy the linker
-#include <propsys.h>
 EXTERN_C const PROPERTYKEY PKEY_Device_FriendlyName = { 
     { 0xa45c254e, 0xdf1c, 0x4efd, { 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0 } }, 
     14 
