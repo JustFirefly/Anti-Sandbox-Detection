@@ -1,12 +1,3 @@
-Here is an updated and polished version of your `README.md`. 
-
-I have made a few improvements to make it even better for the markers:
-1. **Accurate File Tree:** I updated the file structure to include missing files that are in your actual folder but weren't in the original README (e.g., `T09/dns_trap.py`, `T09/setup.txt`, `T09/sample.html`, `T06/vmx.c_6_17`, and `main/main_v2.cpp`).
-2. **Added T09 Instructions:** I added instructions on how to use the DNS trap and setup files for the T09 module.
-3. **Marker-Friendly Formatting:** I added a "Testing Recommendations for Markers" section suggesting they take VM snapshots before testing, which shows good professional practice.
-
-You can copy and paste this directly into your `README.md` file:
-
 ```markdown
 ***
 
