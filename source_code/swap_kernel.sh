@@ -2,7 +2,7 @@
 
 # Configuration - Change these if your backup path is different
 KERNEL_VER=$(uname -r)
-CUSTOM_DIR="/home/firefly/backups"
+CUSTOM_DIR="/home/firefly/backups/kvm"
 if [[ $EUID -ne 0 ]]; then
    echo "Error: This script must be run as root (use sudo)."
    exit 1
@@ -55,7 +55,7 @@ esac
 
 # 4. Restart services
 echo "[*] Restarting virtualization services..."
-systemctl start virtqemud.socket 2>/dev/null || systemctl start libvirtd.socket
+systemctl start virtqemud.socket 2>/dev/null || systemctl start libvirtd
 
 echo ""
 echo "[SUCCESS] KVM State Updated."

@@ -1,0 +1,94 @@
+PROJECT: Sandbox Detection & Evasion
+DOCUMENT: Implementation Tutorial: External Flow Redirection (Dual-VM)
+DATE: April 2026
+AUTHOR: Mohammed Siddiqui
+CONSULTANT: Gemini (AI Collaborator)
+
+1.0 INTRODUCTION & PREREQUISITES
+--------------------------------
+Objective: Provide a reproducible command-set for establishing a high-interaction 
+malware analysis network trap.
+Prerequisites: 
+    - Hypervisor: KVM/QEMU (Virt-Manager).
+    - Guest 1: Windows 11 (Target/Detonation VM).
+    - Guest 2: REMnux (Gateway/Analysis VM).
+    - Virtual Network: Isolated (192.168.100.0/24).
+
+2.0 GUEST 2: GATEWAY CONFIGURATION (REMNUX)
+-------------------------------------------
+Objective: Configure the Linux host to act as a deceptive network gateway.
+
+2.1 Network Interface (Static IP)
+Edit /etc/netplan/01-netcfg.yaml:
+    addresses: [192.168.100.135/24]
+
+Apply: sudo netplan apply
+
+2.2 DNS Port Clearance (Essential)
+REMnux must release Port 53 to allow simulation tools to bind.
+    sudo systemctl stop systemd-resolved
+    sudo systemctl disable systemd-resolved
+    sudo fuser -k 53/udp
+
+2.3 Firewall Flush
+Ensure no internal rules block incoming traffic.
+    sudo iptables -F
+    sudo iptables -X
+    sudo iptables -P INPUT ACCEPT
+
+3.0 SIMULATION SERVICES (INetSim & Python)
+------------------------------------------
+Objective: Serve fake ISP data and redirect DNS queries.
+
+3.1 INetSim Configuration
+Edit /etc/inetsim/inetsim.conf:
+    service_bind_address    192.168.100.135
+    dns_default_ip          192.168.100.135
+    # Ensure 'start_service dns' is COMMENTED OUT if using the Python trap.
+
+3.2 Fake ISP Payload
+Edit /var/lib/inetsim/http/fakefiles/sample.html:
+---
+{
+  "ip": "73.142.12.5",
+  "org": "AS7922 Comcast Cable Communications, LLC",
+  "city": "San Francisco",
+  "region": "California",
+  "country": "US"
+}
+---
+
+3.3 The DNS Trap Script (REMnux)
+File: ~/dns_trap.py
+---
+import socket
+IP = '192.168.100.135'
+PORT = 53
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind(('0.0.0.0', PORT))
+print(f"DNS Trap active on {PORT}...")
+while True:
+    data, addr = sock.recvfrom(512)
+    packet = data[:2] + b"\\x81\\x80\\x00\\x01\\x00\\x01\\x00\\x00\\x00\\x00" + data[12:]
+    packet += b"\\xc0\\x0c\\x00\\x01\\x00\\x01\\x00\\x00\\x00\\x3c\\x00\\x04"
+    packet += bytes(map(int, IP.split('.')))
+    sock.sendto(packet, addr)
+---
+
+4.0 GUEST 1: REDIRECTION COMMANDS (WINDOWS)
+-------------------------------------------
+Objective: Point the target VM to the simulation gateway.
+
+Run in Admin PowerShell:
+    # Set Static IP and Gateway to REMnux
+    New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress 192.168.100.50 -PrefixLength 24 -DefaultGateway 192.168.100.135
+    
+    # Set DNS to REMnux
+    Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 192.168.100.135
+
+5.0 EXECUTION WORKFLOW
+----------------------
+1. REMnux: sudo python3 dns_trap.py
+2. REMnux: sudo inetsim
+3. Windows: ./sandbox_tester -t09
+
