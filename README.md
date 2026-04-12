@@ -1,6 +1,3 @@
-```markdown
-***
-
 # Hypervisor Detection Evasion & VM Spoofing
 
 ## Overview
